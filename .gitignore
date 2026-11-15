@@ -1,0 +1,6 @@
+dist/
+
+# Local deployment configuration
+.openai/hosting.json
+.dev.vars
+.env*

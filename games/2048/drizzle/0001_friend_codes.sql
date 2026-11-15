@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS friend_codes (
+  account TEXT PRIMARY KEY REFERENCES users(code) ON DELETE CASCADE,
+  alias TEXT NOT NULL UNIQUE CHECK(alias GLOB '[A-Z][A-Z][A-Z][0-9][0-9]')
+);

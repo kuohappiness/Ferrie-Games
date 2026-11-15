@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2048</title>
+<style>
+*{box-sizing:border-box}
+:root{--page:#f7f5ec;--ink:#51473e;--board:#a89a8c;--empty:#cbbfb2;--accent:#ec9b61;--panel:#fffcf5;color:var(--ink);background:var(--page);font-family:system-ui,sans-serif}
+:root[data-theme=night]{--page:#252329;--ink:#fff3df;--board:#655c6a;--empty:#827689;--accent:#f2ac73;--panel:#353139;color-scheme:dark}
+:root[data-theme=star]{--page:#161b32;--ink:#edf2ff;--board:#444c72;--empty:#616d95;--accent:#aab8ff;--panel:#242c4a;color-scheme:dark}
+body{margin:0}
+main{width:min(100% - 30px,520px);margin:auto;padding:clamp(18px,7vh,72px) 0 max(20px,env(safe-area-inset-bottom))}
+body{min-height:100dvh;background:radial-gradient(ellipse at 8% 0%,#ffcf9e55,transparent 52%),radial-gradient(ellipse at 96% 22%,#aabaff4a,transparent 49%)}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}
+h1{margin:0;display:grid;place-items:center;width:88px;height:88px;padding:0;color:var(--ink);font-size:clamp(31px,9vw,39px);letter-spacing:-.07em;line-height:1}
+.rainbow{background:linear-gradient(130deg,#ffce70,#ffa8c0 43%,#bfaaff 68%,#8ce7e0);color:#31234a}
+.glass,#board{border:1px solid #ffffff96;border-radius:22px;box-shadow:inset 0 1px 0 #ffffff9c,0 5px 16px #463c531c;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.glass{background:linear-gradient(145deg,#ffffffab,#ffffff42);color:var(--ink)}
+h1.glass{background:linear-gradient(140deg,#fff7d6d9,#ffce6280 65%,#fff1d88f);color:#54361d}
+h1.rainbow{background:linear-gradient(130deg,#ffce70,#ffa8c0 43%,#bfaaff 68%,#8ce7e0);color:#31234a}
+:root[data-theme]:not([data-theme=classic]) .glass{background:linear-gradient(145deg,#ffffff25,#ffffff11)}
+:root[data-theme]:not([data-theme=classic]) h1.glass{color:#ffe8b7}
+:root[data-theme]:not([data-theme=classic]) h1.rainbow{background:linear-gradient(130deg,#ffce70,#ffa8c0 43%,#bfaaff 68%,#8ce7e0);color:#31234a}
+.top-actions{display:flex;gap:9px}
+button,select{font:inherit;border-radius:12px;padding:.6em .75em}
+button{border:0;background:var(--accent);color:#302218;font-weight:750;cursor:pointer;min-height:44px}
+button:focus-visible,select:focus-visible{outline:3px solid #3977bc;outline-offset:2px}
+.icon-button{position:relative;display:grid;place-items:center;width:48px;height:48px;padding:0;border-radius:17px}
+.icon-button svg{width:24px;height:24px}
+.badge{position:absolute;top:-4px;right:-4px;border-radius:99px;background:#b73540;color:white;padding:2px 5px;font-size:10px}
+.summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.08fr);align-items:stretch;gap:8px}
+.stat{padding:8px 4px;text-align:center;min-width:0;border-radius:17px}
+.stat span{display:block;font-weight:700;font-size:.75rem}
+.stat strong{font-size:clamp(18px,5vw,30px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.summary-actions{display:grid;gap:4px;min-width:0}
+.summary-actions button{min-height:38px;padding:5px;font-size:.75rem;border-radius:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hint{font-size:clamp(14px,4vw,20px);font-weight:700;margin:22px 0 12px}
+#board{touch-action:none;user-select:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));aspect-ratio:1;gap:2.5%;padding:2.5%;background:linear-gradient(145deg,#ffffff5e,transparent 55%),color-mix(in srgb,var(--board) 78%,transparent);border-radius:23px}
+.tile{min-width:0;display:grid;place-items:center;border-radius:7px;background:var(--empty);font-weight:800;font-size:clamp(19px,7.4vw,44px);color:#35281c;font-variant-numeric:tabular-nums}
+.tile.small{font-size:clamp(13px,4.8vw,31px)}
+#status{min-height:1.5em;margin:12px 0;text-align:center;font-weight:650}
+#lesson-actions:not(:empty){display:flex;justify-content:center;margin:6px 0 12px}
+.footer-tiles{display:flex;justify-content:center;gap:7px;pointer-events:none}
+.footer-tiles span{display:grid;place-items:center;width:25px;height:25px;border-radius:7px;font-weight:800;font-size:10px;color:#35281c;opacity:.57}
+dialog{width:min(90%,400px);max-height:85vh;border:0;border-radius:15px;padding:23px;background:var(--panel);color:var(--ink);box-shadow:0 16px 60px #0004}
+dialog::backdrop{background:#221b1780}
+dialog h2{margin:0 0 .5em}
+dialog p{line-height:1.5}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.fields{display:grid;gap:12px}
+.field{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.social-list{display:grid;gap:9px;margin:12px 0}.social-list p{margin:0}.social-form{display:grid;gap:8px;margin-top:12px}.social-form input{font:inherit;padding:8px;border-radius:6px;border:1px solid var(--board);min-width:0}.conversation{overflow:auto;max-height:33vh}.message{overflow-wrap:anywhere;padding:6px 0;border-bottom:1px solid var(--board)}.message button{margin-left:6px;min-height:0;padding:4px 8px;font-size:.8rem}
+[data-background=light]{--page:#f7f5ec;--ink:#51473e;--panel:#fffcf5;color-scheme:light}
+[data-background=black]{--page:#000;--ink:#f6f3ee;--panel:#181818;color-scheme:dark}
+:root[data-background=black] body{background:none}
+[data-background=clear]{--page:#edf2f7;--ink:#283447;--panel:#f5f8fc;color-scheme:light}
+:root[data-background=clear] body,.appearance-preview[data-background=clear]{background:radial-gradient(ellipse at 12% 10%,#ffffffd9,transparent 52%),radial-gradient(ellipse at 92% 23%,#b7cbef88,transparent 57%),linear-gradient(150deg,#f2f6fb,#dce8ee 52%,#f8f2f2)}
+:root[data-background=black] .glass,.appearance-preview[data-background=black] .glass{background:linear-gradient(145deg,#ffffff29,#ffffff0c);color:var(--ink);border-color:#ffffff36}
+:root[data-background=clear] .glass,.appearance-preview[data-background=clear] .glass{background:linear-gradient(145deg,#ffffff94,#ffffff23);color:var(--ink)}
+:root[data-frame=solid] :is(.glass,#board),.appearance-preview[data-frame=solid] .glass{background:var(--board,#b1a597);color:#251f1b;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:transparent;box-shadow:none}
+:root[data-frame=solid] #logo:not(.rainbow){background:#f2c75d;color:#392a18}
+:root #logo.rainbow{background:linear-gradient(130deg,#ffce70,#ffa8c0 43%,#bfaaff 68%,#8ce7e0);color:#31234a}
+.appearance-preview{display:flex;justify-content:center;align-items:center;gap:8px;padding:14px;border-radius:14px;background:var(--page);color:var(--ink)}
+.appearance-preview .glass{border-radius:11px;padding:8px 12px;font-weight:800}
+.friend-code{user-select:all;letter-spacing:.06em}
+#board{position:relative}
+.tile.is-moving{z-index:1}
+[data-font=rounded]{font-family:ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif}
+[data-font=mono]{font-family:ui-monospace,"SFMono-Regular",monospace}
+dialog:has(.game-over){width:min(92vw,460px);padding:26px;text-align:center}
+.game-over strong{display:block;font-size:clamp(44px,13vw,68px);letter-spacing:-.08em;line-height:1.1}
+.game-over h2{margin:8px 0}
+.game-over .replay{display:block;width:min(100%,220px);margin:16px auto}
+.end-bubbles{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;max-width:300px;margin:22px auto 8px}
+.end-bubbles span{width:46px;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;color:#35281c;font-weight:800;box-shadow:inset 0 2px 5px #ffffffad,0 3px 9px #0002}
+.end-bubbles span:nth-child(even){transform:translateY(4px)}
+#logo[data-trim=mint]{outline:3px solid #4fb89b;outline-offset:2px}
+#logo[data-trim=violet]{outline:3px solid #a68ae6;outline-offset:2px}
+.shop-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}
+.friend-search{width:100%}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1 id="logo" class="glass">2048</h1>
+<div class="top-actions">
+<button id="friends" class="glass icon-button" type="button" aria-label="好友與聊天">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.5 11.4c0 4.1-3.8 7.1-8.5 7.1-.8 0-1.6-.1-2.3-.3l-4.1 2 .9-3.9C4.6 15 3.5 13.4 3.5 11.4c0-4 3.8-7 8.5-7s8.5 3 8.5 7Z"/></svg>
+<span id="chat-unread" class="badge" aria-hidden="true" hidden></span>
+</button>
+<button id="menu" class="glass icon-button" type="button" aria-label="設定">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"><path d="m10 3-.5 2.5-1.7 1-2.4-.8-2 3.4 1.9 1.7v2.4l-1.9 1.7 2 3.4 2.4-.8 1.7 1 .5 2.5h4l.5-2.5 1.7-1 2.4.8 2-3.4-1.9-1.7v-2.4l1.9-1.7-2-3.4-2.4.8-1.7-1L14 3z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
+</div>
+</header>
+<div class="summary">
+<div class="stat glass"><span id="score-label"></span><strong id="score">0</strong></div>
+<div class="stat glass"><span id="best-label"></span><strong id="best">0</strong></div>
+<nav class="summary-actions"><button id="records" class="glass"></button><button id="account-entry" class="glass"></button></nav>
+</div>
+<p id="hint"></p>
+<div id="board" role="group" aria-label="2048"></div>
+<p id="status" role="status"></p>
+<div id="lesson-actions"></div>
+<div class="footer-tiles" id="footer-tiles" aria-hidden="true"></div>
+</main>
+<dialog id="panel"></dialog>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const strings = {
+  zh: {
+    score:'目前分數',best:'最高分',menu:'選單',records:'排行榜',target:'合併相同的數字，挑戰 2048！',
+    left:'向左',up:'向上',down:'向下',right:'向右',close:'關閉',newGame:'重新開始',
+    settings:'設定',tutorial:'教學',next:'下一步',skip:'跳過教學',finish:'開始遊戲',
+    lesson1:'往左滑或按鍵盤左方向鍵，把右邊的 2 移到左邊。',
+    lesson2:'往上滑，讓兩個 2 碰在一起，合成 4。',
+    lesson3:'合併成 4，這一步就加 4 分。同一塊方塊每回合最多合併一次。',
+    repeat:'請照提示的方向試一次。',restart:'要清除目前的棋盤並開新局嗎？',
+    cancel:'取消',lost:'這局結束了',won:'你合出 2048 了！',keep:'繼續挑戰 4096',
+    language:'語言',theme:'棋盤主題',classic:'經典',night:'夜間',star:'星空',
+    rainbow:'彩色 2048',mergeSound:'合併音效',winSound:'破關音效',volume:'音量',
+    max:'最大方塊',unlock512:'解鎖夜間棋盤',unlock4096:'解鎖星空棋盤',
+    storage:'目前無法儲存。關閉網頁可能會失去進度。'
+  },
+  en: {
+    score:'Score',best:'Best',menu:'Menu',records:'Leaderboard',target:'Merge matching tiles to reach 2048!',
+    left:'Left',up:'Up',down:'Down',right:'Right',close:'Close',newGame:'New game',
+    settings:'Settings',tutorial:'How to play',next:'Next',skip:'Skip tutorial',finish:'Play',
+    lesson1:'Swipe left or press the left arrow on your keyboard to move the 2.',
+    lesson2:'Swipe up to merge the two 2 tiles into a 4.',
+    lesson3:'Merging into a 4 earns 4 points. Each tile can merge once per move.',
+    repeat:'Try moving in the direction shown.',restart:'Clear the current board and start a new game?',
+    cancel:'Cancel',lost:'Game over',won:'You reached 2048!',keep:'Keep playing to 4096',
+    language:'Language',theme:'Board theme',classic:'Classic',night:'Night',star:'Starlight',
+    rainbow:'Rainbow 2048',mergeSound:'Merge sound',winSound:'Victory sound',volume:'Volume',
+    max:'Largest tile',unlock512:'Night board unlocked',unlock4096:'Starlight board unlocked',
+    storage:'Saving is unavailable. Closing the page may lose your progress.'
+  }
+};
+const directions = {
+  left:[...Array(4)].map((_,r)=>[0,1,2,3].map(c=>r*4+c)),
+  right:[...Array(4)].map((_,r)=>[3,2,1,0].map(c=>r*4+c)),
+  up:[...Array(4)].map((_,c)=>[0,1,2,3].map(r=>r*4+c)),
+  down:[...Array(4)].map((_,c)=>[3,2,1,0].map(r=>r*4+c))
+};
+const key = 'classic-2048/v1';
+const gameFields=['board','score','best','largest','won','earnedScore','claimedPoints','spentPoints','ownedTrims','trim'];
+let activeProfile='';
+const empty = () => Array(16).fill(0);
+function slide(board,direction) {
+  const result = empty();
+  let points = 0;
+  const moves=[];
+  for (const line of directions[direction]) {
+    const occupied=line.filter(index=>board[index]);
+    let slot=0;
+    for (let i=0;i<occupied.length;i++) {
+      const source=occupied[i];
+      const target=line[slot++];
+      let value=board[source];
+      const sources=[source];
+      if (value===board[occupied[i+1]]) {
+        value*=2;
+        points+=value;
+        sources.push(occupied[++i]);
+      }
+      result[target]=value;
+      moves.push({sources,target});
+    }
+  }
+  return {board:result,points,moves,changed:result.some((value,index)=>value!==board[index])};
+}
+function spawn(board, random=Math.random) {
+  const open = board.flatMap((value,index)=>value===0?[index]:[]);
+  if (open.length) board[open[Math.floor(random()*open.length)]] = random()<.9?2:4;
+  return board;
+}
+function newBoard() { return spawn(spawn(empty())); }
+function hasMoves(board) { return Object.keys(directions).some(direction=>slide(board,direction).changed); }
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+const defaults = {language:navigator.language.startsWith('zh')?'zh':'en',theme:'classic',background:'auto',frame:'glass',font:'system',rainbow:true,mergeSound:false,winSound:false,volume:.5};
+const freshGame=()=>({board:newBoard(),score:0,best:0,largest:0,won:false,earnedScore:0,claimedPoints:0,spentPoints:0,ownedTrims:[],trim:'default'});
+const state = {...freshGame(),tutorialDone:false,...saved,settings:{...defaults,...saved.settings}};
+let tutorial = -1;
+let lessonBoard = empty();
+lessonBoard[3] = 2;
+lessonBoard[7] = 2;
+let status = '';
+let storageError = false;
+let audioContext;
+const t = id => strings[state.settings.language][id];
+const colours = ['','#eee5da','#ede0c6','#ffba7d','#ff9f6e','#ff8765','#fa735a','#f8df8a','#f5d367','#f3c959','#edc047','#ebad39'];
+function save() {
+  try {
+    const prefs={settings:state.settings,tutorialDone:state.tutorialDone};
+    const board=Object.fromEntries(gameFields.map(name=>[name,state[name]]));
+    if (activeProfile) {
+      const guest=JSON.parse(localStorage.getItem(key))||{};
+      localStorage.setItem(key,JSON.stringify({...guest,...prefs}));
+      localStorage.setItem(key+'/'+activeProfile,JSON.stringify(board));
+    } else localStorage.setItem(key,JSON.stringify({...board,...prefs}));
+    storageError=false;
+  }
+  catch { storageError=true; }
+}
+function switchProfile(code,carryGuest=false) {
+  if (code===activeProfile) return;
+  save();
+  if (!carryGuest) {
+    let board;
+    try {board=JSON.parse(localStorage.getItem(code?key+'/'+code:key));} catch {}
+    const fresh=freshGame();
+    for (const field of gameFields) state[field]=board?.[field]??fresh[field];
+  }
+  activeProfile=code;
+  status='';
+  save();
+  render();
+}
+function playTone(won) {
+  if (!(won ? state.settings.winSound : state.settings.mergeSound) || !state.settings.volume) return;
+  const Audio = window.AudioContext || window.webkitAudioContext;
+  if (!Audio) return;
+  try {
+    audioContext ||= new Audio();
+    void audioContext.resume().catch(()=>{});
+    const now = audioContext.currentTime;
+    for (const [index,hz] of (won?[523,659,784]:[440]).entries()) {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const start = now+index*.1;
+      oscillator.frequency.value=hz;
+      gain.gain.setValueAtTime(state.settings.volume*.1,start);
+      gain.gain.exponentialRampToValueAtTime(.001,start+.14);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start(start);
+      oscillator.stop(start+.15);
+    }
+  } catch {}
+}
+function button(label, action) {
+  const element = document.createElement('button');
+  element.textContent=label;
+  element.addEventListener('click',action);
+  return element;
+}
+function render() {
+  document.documentElement.lang=state.settings.language==='zh'?'zh-Hant':'en';
+  document.documentElement.dataset.theme=state.settings.theme;
+  document.documentElement.dataset.background=state.settings.background;
+  document.documentElement.dataset.frame=state.settings.frame;
+  document.documentElement.dataset.font=state.settings.font;
+  $('logo').dataset.trim=state.trim;
+  $('logo').classList.toggle('rainbow',state.largest>=2048&&state.settings.rainbow);
+  $('score-label').textContent=t('score');
+  $('best-label').textContent=t('best');
+  $('score').textContent=tutorial>=0?(tutorial===2?4:0):state.score;
+  $('best').textContent=state.best;
+  $('menu').setAttribute('aria-label',t('settings'));
+  $('account-entry').textContent=state.settings.language==='zh'?'登入':'Sign in';
+  $('records').textContent=t('records');
+  window.social?.label();
+  $('hint').textContent=t(tutorial>=0?'lesson'+(tutorial+1):'target');
+  $('status').textContent=storageError?t('storage'):status;
+  const board = tutorial>=0?lessonBoard:state.board;
+  $('board').replaceChildren(...board.map(value=>{
+    const tile = document.createElement('div');
+    tile.className='tile';
+    if (!value) return tile;
+    tile.textContent=value;
+    tile.classList.toggle('small',value>=1024);
+    tile.style.background=colours[Math.log2(value)]||'#efd08d';
+    if (value===2048 && state.settings.rainbow) {
+      tile.classList.add('rainbow');
+      tile.style.removeProperty('background');
+    }
+    return tile;
+  }));
+  $('lesson-actions').replaceChildren(...(tutorial>=0?[button(t('close'),finishLesson)]:[]));
+}
+function finishLesson() {
+  tutorial=-1;
+  status='';
+  state.tutorialDone=true;
+  save();
+  render();
+  if (!hasMoves(state.board)) show('lost');
+}
+function startLesson() {
+  closePanel();
+  tutorial=0;
+  lessonBoard=empty();
+  lessonBoard[3]=2;
+  lessonBoard[7]=2;
+  status='';
+  render();
+}
+function move(direction,drag={x:0,y:0}) {
+  if ($('panel').open) return;
+  if (tutorial>=0) {
+    const expected=['left','up'][tutorial];
+    if (!expected) return;
+    if (direction!==expected) {
+      status=t('repeat');
+      $('status').textContent=status;
+      return;
+    }
+    const previous=lessonBoard;
+    const next=slide(previous,direction);
+    lessonBoard=next.board;
+    tutorial++;
+    status=tutorial===2?'+4':'';
+    render();
+    animateMove(next.moves,previous,drag);
+    return;
+  }
+  const next = slide(state.board,direction);
+  if (!next.changed) {
+    if (!hasMoves(state.board)) show('lost');
+    return;
+  }
+  const previousBoard=state.board;
+  state.board=spawn(next.board);
+  state.score+=next.points;
+  state.earnedScore+=next.points;
+  state.best=Math.max(state.best,state.score);
+  const previous=state.largest;
+  const largest=Math.max(...state.board);
+  state.largest=Math.max(previous,largest);
+  const won=!state.won&&largest>=2048;
+  state.won ||= won;
+  const notices=[];
+  if (next.points) notices.push('+'+next.points);
+  if (previous<512&&state.largest>=512) notices.push(t('unlock512'));
+  if (previous<4096&&state.largest>=4096) notices.push(t('unlock4096'));
+  status=notices.join(' · ');
+  if (next.points) playTone(won);
+  save();
+  render();
+  animateMove(next.moves,previousBoard,drag);
+  window.social?.record(state.score,largest);
+  if (won) show('won');
+  else if (!hasMoves(state.board)) show('lost');
+}
+function closePanel() { if ($('panel').open) $('panel').close(); }
+function startGame() {
+  closePanel();
+  tutorial=-1;
+  state.tutorialDone=true;
+  state.board=newBoard();
+  state.score=0;
+  state.won=false;
+  status='';
+  save();
+  render();
+}
+const shopItems=[
+  {id:'mint',zh:'薄荷綠外框',en:'Mint outline',price:3},
+  {id:'violet',zh:'紫水晶外框',en:'Amethyst outline',price:6}
+];
+const words=(zh,en)=>state.settings.language==='zh'?zh:en;
+function pendingPoints() {return Math.max(0,Math.floor(state.earnedScore/100)-state.claimedPoints);}
+function wallet() {return state.claimedPoints-state.spentPoints;}
+function showShop(panel) {
+  const balance=document.createElement('p');
+  balance.textContent=words(`可用點數 ${wallet()} · 待領 ${pendingPoints()}`,`Balance ${wallet()} · Unclaimed ${pendingPoints()}`);
+  const rules=document.createElement('p');
+  rules.textContent=words('正式遊戲累積每 100 分可領 1 點。點數和外框儲存在這台裝置。','Earn 1 point for every 100 points scored in regular games. Points and outlines are saved on this device.');
+  const claim=button(words('領取點數','Claim points'),()=>{
+    state.claimedPoints+=pendingPoints();
+    save();
+    show('shop');
+  });
+  claim.disabled=pendingPoints()===0;
+  panel.append(balance,rules,claim);
+  for (const item of [{id:'default',zh:'原本外框',en:'Original outline',price:0},...shopItems]) {
+    const row=document.createElement('div');
+    row.className='shop-row';
+    const name=document.createElement('span');
+    name.textContent=words(item.zh,item.en);
+    const owned=item.price===0||state.ownedTrims.includes(item.id);
+    const selected=state.trim===item.id;
+    const pick=button(selected?words('使用中','Equipped'):owned?words('使用','Equip'):words(`兌換 · ${item.price} 點`,`Redeem · ${item.price} points`),()=>{
+      if (!owned&&wallet()<item.price) return;
+      if (!owned) {
+        state.spentPoints+=item.price;
+        state.ownedTrims.push(item.id);
+      }
+      state.trim=item.id;
+      save();
+      render();
+      show('shop');
+    });
+    pick.disabled=selected||(!owned&&wallet()<item.price);
+    row.append(name,pick);
+    panel.append(row);
+  }
+}
+function showGameOver(panel,heading) {
+  const content=document.createElement('section');
+  content.className='game-over';
+  const brand=document.createElement('strong');
+  brand.textContent='2048';
+  const result=document.createElement('p');
+  result.textContent=`${t('score')} ${state.score} · ${t('best')} ${state.best}`;
+  const replay=button(words('再玩一次','Play again'),startGame);
+  replay.className='replay';
+  const bubbles=document.createElement('div');
+  bubbles.className='end-bubbles';
+  bubbles.setAttribute('aria-hidden','true');
+  for (const value of [2,4,8,16,32,64,128,256]) {
+    const bubble=document.createElement('span');
+    bubble.textContent=value;
+    bubble.style.background=colours[Math.log2(value)];
+    bubbles.append(bubble);
+  }
+  content.append(brand,heading,result,replay,bubbles,button(words('查看這局棋盤','View final board'),closePanel));
+  panel.replaceChildren(content);
+  if (!panel.open) panel.showModal();
+  replay.focus();
+}
+function show(page) {
+  const panel=$('panel');
+  const heading=document.createElement('h2');
+  heading.id='panel-title';
+  heading.textContent=page==='shop'?words('點數與商店','Points and shop'):t(page==='restart'?'newGame':page);
+  panel.setAttribute('aria-labelledby',heading.id);
+  if (page==='lost') return showGameOver(panel,heading);
+  panel.replaceChildren(heading);
+  const actions=document.createElement('div');
+  actions.className='actions';
+  if (page==='records'||page==='won'||page==='restart') {
+    const detail=document.createElement('p');
+    detail.textContent=page==='records'?`${t('best')} ${state.best} · ${t('max')} ${Math.max(state.largest,...state.board)}`:page==='restart'?t('restart'):`${t('score')} ${state.score} · ${t('best')} ${state.best}`;
+    panel.append(detail);
+    if (page==='restart') actions.append(button(t('newGame'),startGame));
+    if (page==='won') actions.append(button(t('keep'),()=>{
+      closePanel();
+      if (!hasMoves(state.board)) show('lost');
+    }),button(t('newGame'),()=>show('restart')));
+  }
+  if (page==='settings') panel.append(settings());
+  if (page==='settings') {
+    actions.append(button(t('newGame'),()=>show('restart')),button(t('tutorial'),startLesson),
+      button(words('帳號','Account'),()=>window.social?.account()),button(words('點數與商店','Points and shop'),()=>show('shop')));
+  }
+  if (page==='shop') {
+    showShop(panel);
+    actions.append(button(words('返回設定','Back to settings'),()=>show('settings')));
+  }
+  if (page==='records') actions.append(button(state.settings.language==='zh'?'好友排行':'Friend rankings',()=>window.social.friends(true)));
+  if (page==='won') actions.append(button(state.settings.language==='zh'?'分享給好友':'Share with a friend',()=>window.social.share()));
+  actions.append(button(t(page==='restart'?'cancel':'close'),closePanel));
+  panel.append(actions);
+  if (!panel.open) panel.showModal();
+}
+function appearance(fields) {
+  const zh=state.settings.language==='zh';
+  const preview=document.createElement('div');
+  preview.className='appearance-preview';
+  preview.setAttribute('aria-label',zh?'外觀預覽':'Appearance preview');
+  for (const caption of ['2048',t('score')]) {
+    const sample=document.createElement('span');
+    sample.className='glass';
+    sample.textContent=caption;
+    preview.append(sample);
+  }
+  const choices=[
+    ['background',zh?'背景':'Background',[['auto',zh?'跟隨主題':'Match theme'],['light',zh?'淺色':'Light'],['black',zh?'全黑':'Black'],['clear',zh?'透明玻璃':'Clear glass']]],
+    ['frame',zh?'外框':'Frame',[['glass',zh?'透明玻璃':'Clear glass'],['solid',zh?'實色':'Solid']]]
+  ];
+  const inputs=choices.map(([name,caption,options])=>{
+    const label=document.createElement('label');
+    label.className='field';
+    const input=document.createElement('select');
+    for (const [value,description] of options) input.add(new Option(description,value));
+    input.value=state.settings[name];
+    input.onchange=()=>{preview.dataset[name]=input.value;};
+    preview.dataset[name]=input.value;
+    label.append(caption,input);
+    fields.append(label);
+    return [name,input];
+  });
+  fields.append(preview,button(zh?'套用外觀':'Apply appearance',()=>{
+    for (const [name,input] of inputs) state.settings[name]=input.value;
+    save();
+    render();
+  }));
+}
+function settings() {
+  const fields=document.createElement('div');
+  fields.className='fields';
+  const row=(name,input)=>{
+    const label=document.createElement('label');
+    label.className='field';
+    label.append(name==='font'?words('字體','Font'):t(name),input);
+    fields.append(label);
+  };
+  const select=(name,choices)=>{
+    const input=document.createElement('select');
+    for (const [value,label] of choices) input.add(new Option(label,value));
+    input.value=state.settings[name];
+    input.onchange=()=>{
+      state.settings[name]=input.value;
+      status='';
+      save();
+      render();
+      show('settings');
+    };
+    row(name,input);
+  };
+  select('language',[['zh','繁體中文'],['en','English']]);
+  select('font',[['system',words('系統','System')],['rounded',words('圓體','Rounded')],['mono',words('等寬','Monospace')]]);
+  const themes=[['classic',t('classic')]];
+  if (state.largest>=512) themes.push(['night',t('night')]);
+  if (state.largest>=4096) themes.push(['star',t('star')]);
+  select('theme',themes);
+  appearance(fields);
+  for (const name of ['rainbow','mergeSound','winSound']) {
+    if (name==='rainbow'&&state.largest<2048) continue;
+    const input=document.createElement('input');
+    input.type='checkbox';
+    input.checked=state.settings[name];
+    input.onchange=()=>{
+      state.settings[name]=input.checked;
+      save();
+      render();
+    };
+    row(name,input);
+  }
+  const volume=document.createElement('input');
+  Object.assign(volume,{type:'range',min:0,max:1,step:.1,value:state.settings.volume});
+  volume.oninput=()=>{state.settings.volume=Number(volume.value);save();};
+  row('volume',volume);
+  return fields;
+}
+$('menu').onclick=()=>show('settings');
+$('footer-tiles').replaceChildren(...[2,4,8,16,32,64].map(value=>{
+  const tile=document.createElement('span');
+  tile.textContent=value;
+  tile.style.background=colours[Math.log2(value)];
+  return tile;
+}));
+$('records').onclick=()=>show('records');
+const keyboard={ArrowLeft:'left',ArrowUp:'up',ArrowDown:'down',ArrowRight:'right'};
+document.addEventListener('keydown',event=>{
+  if (!keyboard[event.key]||$('panel').open||event.altKey||event.ctrlKey||event.metaKey) return;
+  event.preventDefault();
+  if (!event.repeat) move(keyboard[event.key]);
+});
+const boardElement=$('board');
+const reduceMotion=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+function animateMove(moves,previous,drag) {
+  if (reduceMotion()||!boardElement.children[0]?.animate) return;
+  const boardRect=boardElement.getBoundingClientRect();
+  const tiles=Array.from(boardElement.children);
+  const positions=tiles.map(tile=>tile.getBoundingClientRect());
+  for (const {sources,target} of moves) {
+    const destination=positions[target];
+    const targetTile=tiles[target];
+    const offset=source=>{
+      const point=positions[source];
+      const x=point.left-destination.left+(source===target?0:drag.x);
+      const y=point.top-destination.top+(source===target?0:drag.y);
+      return `translate(${x}px,${y}px)`;
+    };
+    if (sources.length===1) {
+      if (sources[0]!==target) targetTile.animate([{transform:offset(sources[0])},{transform:'none'}],{duration:120,easing:'cubic-bezier(.19,.7,.34,1)'});
+      continue;
+    }
+    for (const source of sources) {
+      const ghost=document.createElement('div');
+      ghost.className='tile is-moving';
+      ghost.setAttribute('aria-hidden','true');
+      ghost.textContent=previous[source];
+      Object.assign(ghost.style,{position:'absolute',pointerEvents:'none',left:(destination.left-boardRect.left-boardElement.clientLeft)+'px',top:(destination.top-boardRect.top-boardElement.clientTop)+'px',width:destination.width+'px',height:destination.height+'px',background:colours[Math.log2(previous[source])]||'#efd08d'});
+      ghost.classList.toggle('small',previous[source]>=1024);
+      boardElement.append(ghost);
+      const animation=ghost.animate([{transform:offset(source)},{transform:'none'}],{duration:107,easing:'ease-out'});
+      animation.onfinish=()=>ghost.remove();
+      animation.oncancel=()=>ghost.remove();
+    }
+    targetTile.animate([{opacity:0,offset:0},{opacity:0,offset:.56},{opacity:1,transform:'scale(1.09,.96)',offset:.76},{transform:'scale(.985,1.025)',offset:.9},{opacity:1,transform:'none'}],{duration:190});
+  }
+}
+let touch;
+function gesture(event) {
+  const x=event.clientX-touch.x;
+  const y=event.clientY-touch.y;
+  const horizontal=Math.abs(x)>Math.abs(y);
+  const major=Math.abs(horizontal?x:y);
+  const minor=Math.abs(horizontal?y:x);
+  const direction=horizontal?(x<0?'left':'right'):(y<0?'up':'down');
+  return {x,y,horizontal,major,minor,direction};
+}
+function releaseDrag(rebound) {
+  for (const tile of boardElement.querySelectorAll('.tile[style*="translate"]')) {
+    const start=tile.style.transform;
+    tile.style.removeProperty('transform');
+    tile.classList.remove('is-moving');
+    if (rebound&&!reduceMotion()) tile.animate?.([{transform:start},{transform:'none'}],{duration:140,easing:'cubic-bezier(.18,.86,.31,1.18)'});
+  }
+}
+boardElement.addEventListener('pointerdown',event=>{
+  if (!event.isPrimary||event.button!==0) return;
+  touch={id:event.pointerId,x:event.clientX,y:event.clientY,drag:{x:0,y:0}};
+  boardElement.setPointerCapture(event.pointerId);
+});
+boardElement.addEventListener('pointermove',event=>{
+  if (event.pointerId!==touch?.id||reduceMotion()) return;
+  const swipe=gesture(event);
+  releaseDrag(false);
+  touch.drag={x:0,y:0};
+  if (swipe.major<5||swipe.major<1.2*swipe.minor) return;
+  const current=tutorial>=0?lessonBoard:state.board;
+  const next=slide(current,swipe.direction);
+  const value=Math.min(next.changed?16:5,swipe.major*(next.changed ? .24 : .12));
+  const x=swipe.horizontal?Math.sign(swipe.x)*value:0;
+  const y=swipe.horizontal?0:Math.sign(swipe.y)*value;
+  touch.drag={x,y};
+  const moving=next.changed?next.moves.flatMap(({sources,target})=>sources.filter(index=>index!==target)):current.flatMap((value,index)=>value?[index]:[]);
+  for (const index of moving) {
+    const tile=boardElement.children[index];
+    tile.style.transform=`translate(${x}px,${y}px)`;
+    tile.classList.add('is-moving');
+  }
+});
+function cancelGesture(event) {
+  if (touch?.id!==event.pointerId) return;
+  touch=null;
+  releaseDrag(true);
+}
+boardElement.addEventListener('pointercancel',cancelGesture);
+boardElement.addEventListener('lostpointercapture',cancelGesture);
+boardElement.addEventListener('pointerup',event=>{
+  if (event.pointerId!==touch?.id) return;
+  const swipe=gesture(event);
+  const drag=touch.drag;
+  touch=null;
+  const current=tutorial>=0?lessonBoard:state.board;
+  const commit=swipe.major>=22&&swipe.major>=1.2*swipe.minor;
+  releaseDrag(!commit||!slide(current,swipe.direction).changed|| (tutorial>=0&&['left','up'][tutorial]!==swipe.direction));
+  if (commit) move(swipe.direction,drag);
+});
+save();
+render();
+if (tutorial<0&&!hasMoves(state.board)) show('lost');
+</script>
+<script src="social.js"></script>
+</body>
+</html>

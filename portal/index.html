@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ferrie Games 遊戲入口，從經典 2048 開始。">
+<title>Ferrie Games</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;color:#edf3ff;background:radial-gradient(ellipse at 85% 15%,#263351,transparent 48%),#101522;font:16px/1.5 system-ui,sans-serif}
+main{width:min(950px, calc(100% - 36px));margin:auto;padding:clamp(42px,10vw,110px) 0}
+h1{font-size:clamp(46px,10vw,100px);letter-spacing:-.075em;line-height:1;margin:0 0 40px}
+h2{font-size:clamp(35px,8vw,64px);line-height:1;margin:0;letter-spacing:-.055em}
+p{color:#c2cde0;margin:16px 0 25px}
+.games{display:grid;gap:20px}
+article{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.78fr);align-items:center;gap:18px;overflow:hidden;border:1px solid #64718b;border-radius:27px;background:linear-gradient(140deg,#24314b,#1b2031);padding:clamp(20px,5vw,50px)}
+a{display:inline-flex;align-items:center;gap:20px;color:#182235;text-decoration:none;font-weight:800;background:#ffc56d;padding:12px 18px;border-radius:12px}
+a:hover{background:#ffd99c}
+a:focus-visible{outline:3px solid white;outline-offset:4px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#8d7567;padding:9px;border-radius:19px;transform:rotate(-6deg);width:min(100%,255px);justify-self:end}
+.board span{display:grid;place-items:center;aspect-ratio:1;border-radius:9px;background:#a99283;color:#30241e;font-weight:850;font-size:clamp(12px,3vw,23px)}
+.board .pale{background:#f1dfc9}.board .gold{background:#ffcd7f}
+@media(max-width:380px){article{gap:10px;padding:15px}.board{gap:4px;padding:5px}}
+</style>
+<main>
+  <h1>Ferrie Games</h1>
+  <section class="games" aria-label="遊戲列表">
+    <article>
+      <div>
+        <h2>2048</h2>
+        <p>滑動方塊，合併相同數字，挑戰 2048。</p>
+        <a href="https://kuo-2048.family-kuo.chatgpt.site">開始玩 <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="board" aria-hidden="true">
+        <span></span><span class="pale">2</span><span></span>
+        <span class="pale">4</span><span class="gold">128</span><span class="pale">8</span>
+        <span></span><span class="gold">256</span><span class="gold">512</span>
+      </div>
+    </article>
+  </section>
+</main>
+</html>

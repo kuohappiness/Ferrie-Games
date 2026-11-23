@@ -1,8 +1,8 @@
 # Ferrie Games
 
-- `portal/`：遊戲入口網站，使用原生 HTML/CSS。
+- `portal/`：come to play 遊戲大廳，使用原生 HTML、CSS 和 JavaScript。
 - `games/2048/`：2048 的前端、Worker API、建置程式及資料庫遷移。
-- 新遊戲放在 `games/<遊戲名稱>/`，發佈後在 `portal/index.html` 加入卡片和遊戲網址。
+- 新遊戲放在 `games/<遊戲名稱>/`，發佈後在 `portal/games.js` 登記名稱、封面、遊戲網址和分類。一款遊戲可以有多個分類。
 
 ## 開發
 

@@ -91,3 +91,41 @@ dialog button { justify-self: end; }
   .hero { min-height: 220px; grid-template-columns: 1.15fr 1fr; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
 }
+.game[data-game="rolling-ball"] .cover {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 38% 15%, #b9f9e4, #80b5e0 63%, #6978b6);
+}
+.game[data-game="rolling-ball"] .cover::before {
+  content: "";
+  position: absolute;
+  top: 53%;
+  left: 22%;
+  width: 61%;
+  height: 31%;
+  border-radius: 12%;
+  background: #dcadfa;
+  box-shadow: 0 9px 0 #7e68be, 0 14px 13px #26386757;
+  transform: rotate(-19deg) skewX(28deg);
+}
+.game[data-game="rolling-ball"] .cover::after {
+  content: "";
+  position: absolute;
+  left: 42%;
+  top: 22%;
+  width: 25%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, #b4e8ff, #4984dc 38%, #21488c 75%);
+  box-shadow: 7px 14px 12px #2d28666b;
+}
+.roadmap-link { white-space: nowrap; color: var(--accent); font-weight: 700; }
+.roadmap { margin: 3rem 0 1rem; scroll-margin-top: 1rem; }
+.roadmap header p { color: var(--muted); margin: .4rem 0 1.1rem; }
+.roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: .85rem; }
+.roadmap article { padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.roadmap article p { color: var(--muted); margin: .35rem 0 0; }
+@media (max-width: 760px) {
+  .roadmap-link { margin-left: auto; font-size: .87rem; }
+  #settings { margin-left: 0; }
+}

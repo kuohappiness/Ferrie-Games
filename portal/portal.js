@@ -4,6 +4,7 @@ const menu = document.querySelector('#menu');
 const hero = document.querySelector('.hero');
 const catalog = document.querySelector('#catalog');
 const recent = document.querySelector('#recent');
+const roadmap = document.querySelector('#roadmap');
 const preferences = document.querySelector('#preferences');
 const theme = document.querySelector('#theme');
 const mobile = matchMedia('(max-width: 760px)');
@@ -79,6 +80,7 @@ function render() {
   const term = query.value.trim().toLowerCase();
   const isHome = active.id === 'all' && !term;
   hero.hidden = !isHome;
+  roadmap.hidden = !isHome;
   for (const anchor of sidebar.querySelectorAll('a')) {
     if (anchor.hash === '#' + active.id) anchor.setAttribute('aria-current', 'page');
     else anchor.removeAttribute('aria-current');
@@ -126,7 +128,18 @@ sidebar.addEventListener('click', event => {
   if (mobile.matches) setMenu(false);
   render();
 });
-window.addEventListener('hashchange', render);
+document.querySelector('.roadmap-link').addEventListener('click', () => {
+  query.value = '';
+  if (mobile.matches) setMenu(false);
+  if (location.hash === '#roadmap') {
+    render();
+    roadmap.scrollIntoView();
+  }
+});
+window.addEventListener('hashchange', () => {
+  render();
+  if (location.hash === '#roadmap') roadmap.scrollIntoView();
+});
 window.addEventListener('pageshow', render);
 query.addEventListener('input', render);
 document.addEventListener('click', event => {

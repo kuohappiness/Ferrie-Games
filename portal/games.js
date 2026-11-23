@@ -18,4 +18,13 @@ const games = [
     url: 'https://kuo-2048.family-kuo.chatgpt.site/',
     cover: ['2', '4', '8', '2048'],
   },
+  {
+    id: 'rolling-ball',
+    name: '浮空滾球',
+    categories: ['challenge'],
+    keywords: ['3D', '滾球', '窄橋', '手把'],
+    description: '在浮空窄橋上控制小球，挑戰兩條賽道的最快時間。',
+    url: '../games/rolling-ball/',
+    cover: [],
+  },
 ];

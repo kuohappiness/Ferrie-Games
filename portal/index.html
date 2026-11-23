@@ -1,41 +1,53 @@
 <!doctype html>
 <html lang="zh-Hant">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Ferrie Games 遊戲入口，從經典 2048 開始。">
-<title>Ferrie Games</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100dvh;color:#edf3ff;background:radial-gradient(ellipse at 85% 15%,#263351,transparent 48%),#101522;font:16px/1.5 system-ui,sans-serif}
-main{width:min(950px, calc(100% - 36px));margin:auto;padding:clamp(42px,10vw,110px) 0}
-h1{font-size:clamp(46px,10vw,100px);letter-spacing:-.075em;line-height:1;margin:0 0 40px}
-h2{font-size:clamp(35px,8vw,64px);line-height:1;margin:0;letter-spacing:-.055em}
-p{color:#c2cde0;margin:16px 0 25px}
-.games{display:grid;gap:20px}
-article{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.78fr);align-items:center;gap:18px;overflow:hidden;border:1px solid #64718b;border-radius:27px;background:linear-gradient(140deg,#24314b,#1b2031);padding:clamp(20px,5vw,50px)}
-a{display:inline-flex;align-items:center;gap:20px;color:#182235;text-decoration:none;font-weight:800;background:#ffc56d;padding:12px 18px;border-radius:12px}
-a:hover{background:#ffd99c}
-a:focus-visible{outline:3px solid white;outline-offset:4px}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#8d7567;padding:9px;border-radius:19px;transform:rotate(-6deg);width:min(100%,255px);justify-self:end}
-.board span{display:grid;place-items:center;aspect-ratio:1;border-radius:9px;background:#a99283;color:#30241e;font-weight:850;font-size:clamp(12px,3vw,23px)}
-.board .pale{background:#f1dfc9}.board .gold{background:#ffcd7f}
-@media(max-width:380px){article{gap:10px;padding:15px}.board{gap:4px;padding:5px}}
-</style>
-<main>
-  <h1>Ferrie Games</h1>
-  <section class="games" aria-label="遊戲列表">
-    <article>
-      <div>
-        <h2>2048</h2>
-        <p>滑動方塊，合併相同數字，挑戰 2048。</p>
-        <a href="https://kuo-2048.family-kuo.chatgpt.site/" target="_blank" rel="noopener">開始玩 <span aria-hidden="true">→</span></a>
-      </div>
-      <div class="board" aria-hidden="true">
-        <span></span><span class="pale">2</span><span></span>
-        <span class="pale">4</span><span class="gold">128</span><span class="pale">8</span>
-        <span></span><span class="gold">256</span><span class="gold">512</span>
-      </div>
-    </article>
-  </section>
-</main>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="come to play 網頁遊戲大廳。直接開玩 2048，探索益智、3D 和棋類遊戲。">
+  <title>come to play | 遊戲大廳</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="games.js" defer></script>
+  <script src="portal.js" defer></script>
+</head>
+<body>
+  <header class="bar">
+    <button id="menu" class="icon" type="button" aria-controls="sidebar" aria-label="遊戲分類" aria-expanded="false">☰</button>
+    <a class="brand" href="./" aria-label="come to play 首頁"><span aria-hidden="true">▶</span> come to play</a>
+    <search><label><span aria-hidden="true">⌕</span><input id="query" type="search" placeholder="搜尋遊戲" aria-label="搜尋遊戲"></label></search>
+    <button id="settings" class="icon" type="button" aria-label="設定">⚙</button>
+  </header>
+  <div class="layout">
+    <aside id="sidebar" aria-label="遊戲分類"></aside>
+    <main id="main">
+      <section class="hero" aria-labelledby="featured-title">
+        <div class="hero-copy">
+          <p class="eyebrow">精選遊戲</p>
+          <h1 id="featured-title">2048</h1>
+          <p class="intro">滑動方塊，讓相同數字合在一起。<br>你能拼出 2048 嗎？</p>
+          <a class="play" data-game="2048" href="https://kuo-2048.family-kuo.chatgpt.site/">開始玩</a>
+        </div>
+        <div class="art" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="tile tile-four">4</div><div class="tile tile-eight">8</div>
+          <div class="tile tile-main">2048</div><div class="tile tile-sixteen">16</div>
+        </div>
+      </section>
+      <section id="recent" hidden aria-label="繼續玩"></section>
+      <div id="catalog"></div>
+      <noscript><p>開啟 JavaScript 即可使用搜尋和分類。</p></noscript>
+    </main>
+  </div>
+  <dialog id="preferences" aria-labelledby="preferences-title">
+    <form method="dialog">
+      <h2 id="preferences-title">大廳設定</h2>
+      <label for="theme">外觀</label>
+      <select id="theme">
+        <option value="light">淺色</option>
+        <option value="dark">深色</option>
+        <option value="system">跟隨系統</option>
+      </select>
+      <button class="play">完成</button>
+    </form>
+  </dialog>
+</body>
 </html>

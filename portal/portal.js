@@ -56,18 +56,14 @@ function card(game) {
   return link;
 }
 
-function showGames(container, title, items, category) {
+function showGames(container, title, items) {
   const heading = element('div', 'section-heading');
   heading.append(element('h2', '', title));
-  if (category) {
-    const link = categoryLink(category, 'see-all');
-    link.textContent = '看全部';
-    link.setAttribute('aria-label', '看全部' + category.name);
-    heading.append(link);
-  }
   container.append(heading);
   if (!items.length) {
     container.append(element('p', 'empty', query.value.trim() ? '沒有符合的遊戲。' : '這個分類的遊戲還在準備中。'));
+    const plan = roadmap.querySelector('a[href="#' + selectedCategory().id + '"] p');
+    if (!query.value.trim() && plan) container.append(element('p', 'category-plan', plan.textContent));
     return;
   }
   const grid = element('div', 'grid');
@@ -86,17 +82,21 @@ function render() {
     else anchor.removeAttribute('aria-current');
   }
 
-  const lastPlayed = games.find(game => game.id === readSetting('come-to-play:recent'));
-  recent.hidden = !isHome || !lastPlayed;
+  const { active: playerId, players } = lobbyPlayer.read();
+  const history = players[playerId].recent;
+  const played = history.map(id => games.find(game => game.id === id)).filter(Boolean);
+  applyShopTheme(players[playerId]);
+  recent.hidden = !isHome;
   recent.replaceChildren();
-  if (!recent.hidden) showGames(recent, '繼續玩', [lastPlayed]);
+  if (isHome) {
+    if (played.length) showGames(recent, '再玩一次', played.slice(0, 4));
+    else recent.append(element('h2', 'section-heading', '再玩一次'),
+      element('p', 'empty', '玩過的遊戲會顯示在這裡。'));
+  }
 
   catalog.replaceChildren();
   if (isHome) {
-    for (const category of categories) {
-      const items = games.filter(game => game.categories.includes(category.id));
-      if (items.length) showGames(catalog, category.name, items.slice(0, 4), category);
-    }
+    showGames(catalog, '所有遊戲', games);
     return;
   }
   const matching = games.filter(game => {
@@ -126,7 +126,7 @@ sidebar.addEventListener('click', event => {
   if (!event.target.closest('a')) return;
   query.value = '';
   if (mobile.matches) setMenu(false);
-  render();
+  if (location.hash === event.target.closest('a').hash) render();
 });
 document.querySelector('.roadmap-link').addEventListener('click', () => {
   query.value = '';
@@ -139,12 +139,13 @@ document.querySelector('.roadmap-link').addEventListener('click', () => {
 window.addEventListener('hashchange', () => {
   render();
   if (location.hash === '#roadmap') roadmap.scrollIntoView();
+  else if (location.hash) window.scrollTo(0, 0);
 });
 window.addEventListener('pageshow', render);
 query.addEventListener('input', render);
 document.addEventListener('click', event => {
   const link = event.target.closest('a[data-game]');
-  if (link) writeSetting('come-to-play:recent', link.dataset.game);
+  if (link) lobbyPlayer.visit(link.dataset.game);
 });
 document.querySelector('#settings').addEventListener('click', () => preferences.showModal());
 theme.value = readSetting('come-to-play:theme') ?? 'light';
@@ -154,5 +155,107 @@ theme.addEventListener('change', () => {
   document.documentElement.dataset.theme = theme.value;
   writeSetting('come-to-play:theme', theme.value);
 });
+function applyShopTheme(player) {
+  document.documentElement.dataset.shopTheme = player.theme;
+}
+
 setMenu(!mobile.matches);
 render();
+
+const panel = document.querySelector('#player-panel');
+const panelTitle = document.querySelector('#player-title');
+const panelContent = document.querySelector('#player-content');
+const feedback = document.querySelector('#player-feedback');
+const panelTitles = { account: '帳號', records: '遊戲紀錄', shop: '商城' };
+
+function savePanel(success, type) {
+  if (success) {
+    render();
+    showPanel(type);
+  } else feedback.textContent = '此瀏覽器無法儲存變更。';
+}
+
+function accountPanel(data) {
+  const help = element('p', 'panel-note', '大廳的玩家檔案儲存在這台裝置。你可以切換玩家，各自保存紀錄與外觀。');
+  const select = element('select');
+  select.setAttribute('aria-label', '目前玩家');
+  for (const [id, player] of Object.entries(data.players)) select.add(new Option(player.name, id));
+  select.value = data.active;
+  select.addEventListener('change', () => savePanel(lobbyPlayer.select(select.value), 'account'));
+
+  const form = element('form', 'profile-create');
+  const name = element('input');
+  name.placeholder = '玩家暱稱';
+  name.setAttribute('aria-label', '新玩家暱稱');
+  name.maxLength = 20;
+  name.required = true;
+  const add = element('button', 'play', '建立玩家');
+  form.append(name, add);
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const nickname = name.value.trim();
+    if (!nickname) {
+      feedback.textContent = '請輸入玩家暱稱。';
+      return;
+    }
+    if (Object.values(data.players).some(player => player.name === nickname)) {
+      feedback.textContent = '這個暱稱已經有玩家使用。';
+      return;
+    }
+    savePanel(lobbyPlayer.create(nickname), 'account');
+  });
+  const signIn = element('a', 'panel-link', '前往 2048 的登入與好友功能');
+  signIn.href = games.find(game => game.id === '2048').url;
+  panelContent.append(help, select, form, signIn);
+}
+
+function recordsPanel(player) {
+  panelContent.append(element('p', 'panel-note', player.name + '的本機紀錄'));
+  const list = element('ul', 'record-list');
+  const labels = { 'rolling-ball:0': '薄荷天橋', 'rolling-ball:1': '日落迴廊', gomoku: '五子棋完局' };
+  for (const [key, label] of Object.entries(labels)) {
+    const score = player.scores[key];
+    if (typeof score === 'number') list.append(element('li', '', label + ' · ' +
+      (key === 'gomoku' ? score + ' 局' : score.toFixed(2) + ' 秒')));
+  }
+  if (!list.childElementCount) list.append(element('li', '', '完成一局五子棋或一關浮空滾球後，就會顯示紀錄。'));
+  const signIn = element('a', 'panel-link', '到 2048 查看最高分與排行榜');
+  signIn.href = games.find(game => game.id === '2048').url;
+  panelContent.append(list, signIn);
+}
+
+function shopPanel(player) {
+  const balance = lobbyPlayer.points(player);
+  panelContent.append(
+    element('p', 'balance', '遊戲點數 ' + balance),
+    element('p', 'panel-note', '首次完成浮空滾球的每關或一局五子棋，各得 1 點，可兌換大廳配色。'),
+  );
+  for (const { id, name, price } of [{ id: '', name: '預設配色', price: 0 }, ...lobbyPlayer.items]) {
+    const current = id === player.theme;
+    const owned = !id || player.owned.includes(id);
+    const row = element('div', 'shop-row');
+    row.append(element('span', '', name));
+    const button = element('button', 'play', current ? '使用中' : owned ? '套用' : price + ' 點兌換');
+    button.disabled = current || (!owned && balance < price);
+    if (!owned && balance < price) button.textContent = '需要 ' + price + ' 點';
+    button.addEventListener('click', () => savePanel(lobbyPlayer.useTheme(id), 'shop'));
+    row.append(button);
+    panelContent.append(row);
+  }
+}
+
+function showPanel(type) {
+  const data = lobbyPlayer.read();
+  const player = data.players[data.active];
+  panelTitle.textContent = panelTitles[type];
+  panelContent.replaceChildren();
+  feedback.textContent = '';
+  if (type === 'account') accountPanel(data);
+  if (type === 'records') recordsPanel(player);
+  if (type === 'shop') shopPanel(player);
+  if (!panel.open) panel.showModal();
+}
+
+document.querySelectorAll('[data-panel]').forEach(button => {
+  button.addEventListener('click', () => showPanel(button.dataset.panel));
+});

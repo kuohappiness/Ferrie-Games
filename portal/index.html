@@ -6,6 +6,7 @@
   <meta name="description" content="come to play 網頁遊戲大廳。直接開玩 2048，探索益智、3D 和棋類遊戲。">
   <title>come to play | 遊戲大廳</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="player.js" defer></script>
   <script src="games.js" defer></script>
   <script src="portal.js" defer></script>
 </head>
@@ -14,7 +15,11 @@
     <button id="menu" class="icon" type="button" aria-controls="sidebar" aria-label="遊戲分類" aria-expanded="false">☰</button>
     <a class="brand" href="./" aria-label="come to play 首頁"><span aria-hidden="true">▶</span> come to play</a>
     <search><label><span aria-hidden="true">⌕</span><input id="query" type="search" placeholder="搜尋遊戲" aria-label="搜尋遊戲"></label></search>
-    <a class="roadmap-link" href="#roadmap">開發計畫</a>
+    <div class="utilities">
+      <button type="button" data-panel="account">帳號</button>
+      <button type="button" data-panel="records">遊戲紀錄</button>
+      <button type="button" data-panel="shop">商城</button>
+    </div>
     <button id="settings" class="icon" type="button" aria-label="設定">⚙</button>
   </header>
   <div class="layout">
@@ -33,47 +38,54 @@
           <div class="tile tile-main">2048</div><div class="tile tile-sixteen">16</div>
         </div>
       </section>
-      <section id="recent" hidden aria-label="繼續玩"></section>
+      <section id="recent" aria-label="再玩一次"></section>
       <div id="catalog"></div>
       <section class="roadmap" id="roadmap" aria-labelledby="roadmap-title">
         <header>
           <h2 id="roadmap-title">開發計畫</h2>
-          <p>2048 和浮空滾球已可開玩。下列遊戲會逐款完成後上架。</p>
+          <p>點選卡片可查看該分類。新遊戲完成後會出現在遊戲清單。</p>
         </header>
         <div class="roadmap-grid">
-          <article>
+          <a class="plan" href="#world">
             <h3>開放世界</h3>
             <p>在原創港口城市下車探索、換車、送貨。開車到碼頭可以接著開船，也能到科幻競技場對戰。</p>
-          </article>
-          <article>
+          </a>
+          <a class="plan" href="#driving">
             <h3>開車與航海</h3>
             <p>海岸賽車挑戰單圈，小鎮自由開車偏寫實，港灣開船練習繞標和靠岸。後續可加越野、公車、快艇和拖船。</p>
-          </article>
-          <article>
+          </a>
+          <a class="plan" href="#action">
             <h3>3D 槍戰</h3>
             <p>稜鏡競技場短回合能量對決、漆彈搶色、機器人防線護送能源車、港區核心收集後搭船撤離。</p>
-          </article>
-          <article>
+          </a>
+          <a class="plan" href="#blocks">
             <h3>方塊世界</h3>
             <p>在方塊小島拆放方塊和建造，用地心礦車挖礦和運寶石，在天空方塊跑酷挑戰浮島跳躍。</p>
-          </article>
-          <article>
+          </a>
+          <a class="plan" href="#challenge">
             <h3>3D 挑戰</h3>
-            <p>浮空滾球已推出。接著規劃 3D 迷宮找出口、街道跑酷換道和跳躍。</p>
-          </article>
-          <article>
+            <p>接著規劃 3D 迷宮找出口、街道跑酷換道和跳躍。</p>
+          </a>
+          <a class="plan" href="#board">
             <h3>棋類對弈</h3>
-            <p>15×15 五子棋先做雙人同機，象棋加入合法走法與將軍提示，圍棋從 9×9 入門棋盤開始。</p>
-          </article>
-          <article>
+            <p>象棋規劃合法走法與將軍提示，圍棋從 9×9 入門棋盤開始。</p>
+          </a>
+          <a class="plan" href="#puzzle">
             <h3>益智休閒</h3>
             <p>2048 已推出，後續可加入翻牌配對、推箱子、打磚塊、貪食蛇和踩地雷。</p>
-          </article>
+          </a>
         </div>
       </section>
+      <footer><a class="roadmap-link" href="#roadmap">開發計畫</a></footer>
       <noscript><p>開啟 JavaScript 即可使用搜尋和分類。</p></noscript>
     </main>
   </div>
+  <dialog id="player-panel" aria-labelledby="player-title">
+    <h2 id="player-title"></h2>
+    <div id="player-content"></div>
+    <p id="player-feedback" role="status"></p>
+    <form method="dialog"><button class="play">完成</button></form>
+  </dialog>
   <dialog id="preferences" aria-labelledby="preferences-title">
     <form method="dialog">
       <h2 id="preferences-title">大廳設定</h2>

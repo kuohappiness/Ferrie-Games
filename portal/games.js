@@ -27,4 +27,13 @@ const games = [
     url: '../games/rolling-ball/',
     cover: [],
   },
+  {
+    id: 'gomoku',
+    name: '五子棋',
+    categories: ['board'],
+    keywords: ['雙人', '棋盤', '黑白棋'],
+    description: '同一台裝置輪流下棋，率先連成五顆就獲勝。',
+    url: '../games/gomoku/',
+    cover: [],
+  },
 ];

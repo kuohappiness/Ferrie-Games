@@ -78,6 +78,8 @@ let elapsed = 0;
 let state = 'ready';
 let notice = 0;
 let bestTime = null;
+let profile = lobbyPlayer.read().active;
+lobbyPlayer.visit('rolling-ball');
 let gamepadSeen = false;
 const keys = new Set();
 const movementKeys = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'Space']);
@@ -130,17 +132,21 @@ function bestKey() {
 }
 
 function readBest() {
+  const { players } = lobbyPlayer.read();
+  const profileBest = players[profile]?.scores['rolling-ball:' + courseIndex];
+  if (profile !== 'guest') return profileBest ?? null;
   try {
     const saved = Number(localStorage.getItem(bestKey()));
-    return Number.isFinite(saved) && saved > 0 ? saved : null;
+    return Number.isFinite(saved) && saved > 0 ? Math.min(saved, profileBest ?? Infinity) : profileBest ?? null;
   } catch {
-    return null;
+    return profileBest ?? null;
   }
 }
 
 function reset(index) {
   if (result.open) result.close();
   clearInputs();
+  profile = lobbyPlayer.read().active;
   courseIndex = index;
   level.value = String(index);
   course = courses[index];
@@ -163,12 +169,13 @@ function reset(index) {
 
 function finish() {
   state = 'won';
+  lobbyPlayer.complete('rolling-ball', courseIndex, elapsed, profile);
   const record = bestTime === null || elapsed < bestTime;
   if (record) {
     bestTime = elapsed;
     best.value = bestTime.toFixed(2);
     try {
-      localStorage.setItem(bestKey(), String(bestTime));
+      if (profile === 'guest') localStorage.setItem(bestKey(), String(bestTime));
     } catch {
       // The result remains visible for this visit.
     }

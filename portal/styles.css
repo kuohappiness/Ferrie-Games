@@ -123,9 +123,57 @@ dialog button { justify-self: end; }
 .roadmap { margin: 3rem 0 1rem; scroll-margin-top: 1rem; }
 .roadmap header p { color: var(--muted); margin: .4rem 0 1.1rem; }
 .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: .85rem; }
-.roadmap article { padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.roadmap article p { color: var(--muted); margin: .35rem 0 0; }
+.roadmap .plan { padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.roadmap .plan p { color: var(--muted); margin: .35rem 0 0; }
 @media (max-width: 760px) {
-  .roadmap-link { margin-left: auto; font-size: .87rem; }
   #settings { margin-left: 0; }
+}
+:root[data-shop-theme="mint"] { --accent: #176c59; --selected: #d6f7e9; }
+:root[data-shop-theme="peach"] { --accent: #9d452a; --selected: #ffe7dc; }
+:root[data-shop-theme="mint"] .hero { background: #dbf7eb; }
+:root[data-shop-theme="peach"] .hero { background: #ffe8df; }
+:root[data-theme="dark"][data-shop-theme="mint"] { --accent: #96e4c7; --selected: #234c44; }
+:root[data-theme="dark"][data-shop-theme="peach"] { --accent: #ffb99d; --selected: #593a39; }
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"][data-shop-theme="mint"] { --accent: #96e4c7; --selected: #234c44; }
+  :root[data-theme="system"][data-shop-theme="peach"] { --accent: #ffb99d; --selected: #593a39; }
+}
+.utilities { display: flex; gap: .25rem; }
+.utilities button { color: var(--accent); background: transparent; border: 0; min-height: 44px; border-radius: 10px; padding: .25rem .55rem; white-space: nowrap; font-weight: 750; }
+.utilities button:hover { background: var(--selected); }
+.roadmap .plan:hover, .roadmap .plan:focus-visible { border-color: var(--accent); }
+.roadmap .plan h3 { color: var(--accent); }
+.game:active, .plan:active { opacity: .8; }
+.category-plan { max-width: 50ch; }
+footer { margin-block: 2rem 1rem; }
+#player-panel select, .profile-create input { width: 100%; background: var(--background); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: .6rem; }
+#player-panel .profile-create { grid-template-columns: minmax(0, 1fr) auto; margin-block: .65rem; }
+.panel-note, .record-list { color: var(--muted); }
+.panel-link { color: var(--accent); text-decoration: underline; display: inline-block; }
+.balance { font-weight: 800; }
+.shop-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.play:disabled { opacity: .65; cursor: default; }
+.game[data-game="gomoku"] .cover {
+  position: relative;
+  background: repeating-linear-gradient(90deg, #76501b66 0 1px, transparent 1px 23px) center,
+    repeating-linear-gradient(#76501b66 0 1px, transparent 1px 23px) center, #f2c584;
+}
+.game[data-game="gomoku"] .cover::after {
+  content: "";
+  width: 27px;
+  aspect-ratio: 1;
+  background: #25263a;
+  border-radius: 50%;
+  box-shadow: 23px -23px 0 #25263a, -23px 23px 0 #25263a, 23px 0 0 #fff8e8, 0 23px 0 #fff8e8;
+  margin: auto;
+  grid-column: 1 / -1;
+}
+@media (max-width: 760px) {
+  .utilities { margin-left: auto; }
+  .utilities button { padding-inline: .32rem; font-size: .88rem; }
+  #settings { margin-left: 0; }
+}
+@media (max-width: 370px) {
+  .brand { gap: .3rem; }
+  .brand span { display: none; }
 }

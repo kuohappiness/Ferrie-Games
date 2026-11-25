@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="和朋友在同一台裝置玩 15×15 五子棋。">
+  <title>五子棋 | come to play</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="../../portal/player.js" defer></script>
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main>
+    <nav><a href="../../portal/">回遊戲大廳</a><button id="reset" type="button">重新開始</button></nav>
+    <header><h1>五子棋</h1><p>兩人輪流落子，先連成五顆或以上就贏。</p></header>
+    <p id="turn" role="status">輪到黑棋</p>
+    <div id="board" aria-label="十五乘十五五子棋棋盤" role="group"></div>
+  </main>
+</body>
+</html>

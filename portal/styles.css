@@ -177,3 +177,28 @@ footer { margin-block: 2rem 1rem; }
   .brand { gap: .3rem; }
   .brand span { display: none; }
 }
+.game[data-game="taipei-drive"] .cover {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(155deg, #abd5e5 52%, #63a9ab 52%);
+}
+.game[data-game="taipei-drive"] .cover::before {
+  content: "";
+  position: absolute;
+  inset: 43% 16% 12%;
+  transform: skewX(-25deg);
+  border-radius: .5rem;
+  background: linear-gradient(transparent 46%, #f8dc8f 46% 53%, transparent 53%), #52647a;
+  box-shadow: -.2rem .45rem 0 #c9bfa2;
+}
+.game[data-game="taipei-drive"] .cover::after {
+  content: "";
+  position: absolute;
+  width: 12%;
+  height: 47%;
+  left: 55%;
+  bottom: 36%;
+  border-radius: 28% 28% 0 0;
+  background: repeating-linear-gradient(#bce4db 0 4px,#377887 4px 10px);
+  box-shadow: -2.4rem .85rem 0 -.2rem #de987b, 1.7rem 1.04rem 0 -.2rem #918ac2;
+}

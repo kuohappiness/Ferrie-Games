@@ -36,4 +36,13 @@ const games = [
     url: '../games/gomoku/',
     cover: [],
   },
+  {
+    id: 'taipei-drive',
+    name: '台北街頭自由行',
+    categories: ['world', 'driving'],
+    keywords: ['台灣', '開車', '城市', '台北', '臺北', '送貨'],
+    description: '在台北風街區步行、換車，挑戰夜市、商圈和河岸的送貨路線。',
+    url: '../games/taipei-drive/',
+    cover: [],
+  },
 ];

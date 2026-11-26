@@ -212,13 +212,13 @@ function accountPanel(data) {
 function recordsPanel(player) {
   panelContent.append(element('p', 'panel-note', player.name + '的本機紀錄'));
   const list = element('ul', 'record-list');
-  const labels = { 'rolling-ball:0': '薄荷天橋', 'rolling-ball:1': '日落迴廊', gomoku: '五子棋完局' };
+  const labels = { 'rolling-ball:0': '薄荷天橋', 'rolling-ball:1': '日落迴廊', gomoku: '五子棋完局', 'taipei-drive': '台北街頭送達' };
   for (const [key, label] of Object.entries(labels)) {
     const score = player.scores[key];
     if (typeof score === 'number') list.append(element('li', '', label + ' · ' +
-      (key === 'gomoku' ? score + ' 局' : score.toFixed(2) + ' 秒')));
+      (key === 'gomoku' ? score + ' 局' : key === 'taipei-drive' ? score + ' 趟' : score.toFixed(2) + ' 秒')));
   }
-  if (!list.childElementCount) list.append(element('li', '', '完成一局五子棋或一關浮空滾球後，就會顯示紀錄。'));
+  if (!list.childElementCount) list.append(element('li', '', '完賽、下完一局棋或完成送貨後，就會顯示紀錄。'));
   const signIn = element('a', 'panel-link', '到 2048 查看最高分與排行榜');
   signIn.href = games.find(game => game.id === '2048').url;
   panelContent.append(list, signIn);
@@ -228,7 +228,7 @@ function shopPanel(player) {
   const balance = lobbyPlayer.points(player);
   panelContent.append(
     element('p', 'balance', '遊戲點數 ' + balance),
-    element('p', 'panel-note', '首次完成浮空滾球的每關或一局五子棋，各得 1 點，可兌換大廳配色。'),
+    element('p', 'panel-note', '首次完成滾球關卡、完成一局五子棋或送達一處目的地，各得 1 點，可兌換大廳配色。'),
   );
   for (const { id, name, price } of [{ id: '', name: '預設配色', price: 0 }, ...lobbyPlayer.items]) {
     const current = id === player.theme;

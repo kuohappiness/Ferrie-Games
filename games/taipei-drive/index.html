@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="在 3D 台北風城市自由步行、換車和送貨。">
+  <title>台北街頭自由行｜come to play</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="../../portal/player.js" defer></script>
+  <script type="module" src="game.mjs"></script>
+</head>
+<body>
+  <main id="game">
+    <canvas id="scene" aria-label="台北風街區場景"></canvas>
+    <header>
+      <a class="button" href="../../portal/">回大廳</a>
+      <h1>台北街頭自由行</h1>
+      <button id="reset" type="button">回車庫</button>
+    </header>
+    <section class="mission" aria-label="任務">
+      <strong id="objective">到車庫的黃色圓圈接單</strong>
+      <span id="trip">步行 · 已送達 0</span>
+    </section>
+    <canvas id="map" width="176" height="152" aria-label="小地圖，白色是你，黃色是任務目的地"></canvas>
+    <p id="notice" role="status"></p>
+    <div class="controls">
+      <div id="joystick" aria-label="觸控搖桿"><span></span></div>
+      <p>方向鍵／WASD 移動與駕駛<br>E 互動 · 空白鍵煞車</p>
+      <div class="actions">
+        <button id="brake" type="button">煞車</button>
+        <button id="interact" type="button">互動</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
